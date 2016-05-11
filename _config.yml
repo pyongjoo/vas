@@ -2,7 +2,7 @@
 title: VAS
 tag_text: Visualization-Aware Sampling
 description: A sampling-based fast visualization technique for very large data
-url: "http://127.0.0.1:4000"
+url: "http://pyongjoo.github.io/vas"
 baseurl: ""
 
 font-awesome-include: true # make this false if you don't need font-awesome
