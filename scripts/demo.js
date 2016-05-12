@@ -10,11 +10,11 @@ var filterExampleArr = [
 ];
 
 function setFilterTextarea(text) {
-  $("#filter-body").html(text);
+  $("#filter-body").val(text);
 }
 
 function setMapTextarea(text) {
-  $("#map-body").html(text);
+  $("#map-body").val(text);
 }
 
 function resetFilterTextarea() {
