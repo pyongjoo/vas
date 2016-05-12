@@ -9,6 +9,30 @@ var filterExampleArr = [
   "return true;"
 ];
 
+var mapExampleArr = [
+  "return point;",
+  "return point;",
+  "return point;",
+  "return point;",
+  "point.color = colorPicker[point.country.hashCode()%colorPicker.length];\
+   point.marker.radius = point.marker.radius/2.0; return point;",
+];
+
+var colorPicker = ["#83AA30","#1499D3","#4D6684","#3D3D3D","#E74700","#F17D80","#737495","#68A8AD","#C4D4AF","#6C8672",
+    "#B0A472","#F5DF65","#2B9464","#59C8DF","#59C8DF","#753A48","#954F47","#C05949","#9AADBD","#9AADBD"
+];
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr, len;
+  if (this.length === 0) return hash;
+  for (i = 0, len = this.length; i < len; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
 function setFilterTextarea(text) {
   $("#filter-body").val(text);
 }
@@ -64,6 +88,7 @@ $(function () {
   $(".demo-chart-examples").click( function(event) {
     var ex_no = parseInt($(event.target).attr('id').replace( /^\D+/g, ''));
     setFilterTextarea(filterExampleArr[ex_no]);
+    setMapTextarea(mapExampleArr[ex_no]);
   });
 
   selectDatasetButton($($(".dataset-select[dataset='open_vas_density_geo_1000.csv']")[0]));

@@ -1,3 +1,4 @@
+
 function alt2color(alt, alpha = 0.6) {
   // low value: 0, mDarkTeal = rgb(35, 55, 59)
   // 25% value: 100, rgb(51, 102, 204)
@@ -111,7 +112,8 @@ function setupChart(container, titletext) {
     },
     tooltip: {
       animation: false,
-      enabled: true
+      enabled: true,
+      pointFormat: 'x: <b>{point.x}</b><br/> y: <b>{point.y}</b><br/> density: <b>{point.count}</b><br/> country: <b>{point.country}</b><br/>'
     },
     legend: {
       enabled: false
@@ -154,7 +156,9 @@ function csv2series(csvstring, alpha = 1.0) {
     series.push({
       x: parseFloat(data[i][1]),
       y: parseFloat(data[i][0]),
-      color: alt2color(parseFloat(data[i][2]), alpha)
+      color: alt2color(parseFloat(data[i][2]), alpha),
+      count: data[i][3],
+      country: address2Country(data[i][4])
     });
   }
 
@@ -180,6 +184,7 @@ function csv2richSeries(csvstring, alpha = 0.6) {
       marker: {
         radius: count2size(parseFloat(data[i][3]))
       },
+      count: data[i][3],
       country: address2Country(data[i][4])
     });
   }
