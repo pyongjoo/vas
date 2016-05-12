@@ -63,7 +63,7 @@ function count2size(count) {
 
 function address2Country(address) {
   adr_tokens = address.replace(/"/g, '').split(',');
-  return adr_tokens[adr_tokens.length-1].replace(/ /g, '');
+  return adr_tokens[adr_tokens.length-1].trim();
 }
 
 
@@ -96,12 +96,18 @@ function setupChart(container, titletext) {
     xAxis: {
       title: {
         text: 'longitude'
-      }
+      },
+      min: -190,
+      max: 190,
+      tickInterval: 50
     },
     yAxis: {
       title: {
         text: 'latitude'
-      }
+      },
+      min: -100,
+      max: 100,
+      tickInterval: 25
     },
     tooltip: {
       animation: false,

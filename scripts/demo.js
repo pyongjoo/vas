@@ -1,6 +1,14 @@
 var data_filename;
 var chart;
 
+var filterExampleArr = [
+  "return true;",
+  "return point.country.toLowerCase() == 'australia'",
+  "return point.country.toLowerCase() == 'united states'",
+  "var country = point.country.toLowerCase(); return country.includes('korea') || country.includes('china') || country.includes('japan');",
+  "return true;"
+];
+
 function setFilterTextarea(text) {
   $("#filter-body").html(text);
 }
@@ -52,8 +60,16 @@ $(function () {
     drawChart();
   });
 
+  // Hook example events.
+  $(".demo-chart-examples").click( function(event) {
+    var ex_no = parseInt($(event.target).attr('id').replace( /^\D+/g, ''));
+    setFilterTextarea(filterExampleArr[ex_no]);
+  });
+
   selectDatasetButton($($(".dataset-select[dataset='open_vas_density_geo_1000.csv']")[0]));
   resetTextareas();
   drawChart();
 });
+
+
 
