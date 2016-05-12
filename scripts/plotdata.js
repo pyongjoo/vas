@@ -82,7 +82,10 @@ function setupChart(container, titletext) {
   container.highcharts({
     chart: {
       type: 'scatter',
-      animation: false
+      animation: false,
+      panning: true,
+      panKey: 'shift',
+      zoomType: 'xy'
     },
     credits: {
       enabled: false
@@ -101,7 +104,7 @@ function setupChart(container, titletext) {
       }
     },
     tooltip: {
-      animation: true,
+      animation: false,
       enabled: true
     },
     legend: {
@@ -121,7 +124,13 @@ function setupChart(container, titletext) {
     }]
   });
 
-  return container.highcharts();
+  var chart = container.highcharts();
+
+  //chart.renderer.image(
+  //    $("#baseurl").html() + "/images/BlankMap-FlatWorld6.svg",
+  //    105, 70, 485, 250).add();
+
+  return chart;
 };
 
 
@@ -174,7 +183,15 @@ function csv2richSeries(csvstring, alpha = 0.6) {
 
 
 function plotSeriesOnChart(series, chart) {
+
+  chart.series[0].setData([]);    // clean first
+
+  var t0 = performance.now();
   chart.series[0].setData(series);
+  var t1 = performance.now();
+  var elapsed = Math.round((t1-t0)/10.0)/100.0;
+
+  $("#viz-time").html(elapsed.toString());
 };
 
 
