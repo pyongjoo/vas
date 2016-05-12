@@ -1,10 +1,15 @@
-function alt2color(alt) {
+function alt2color(alt, alpha = 0.6) {
   // low value: 0, mDarkTeal = rgb(35, 55, 59)
   // 25% value: 100, rgb(51, 102, 204)
   // 50% value: 300, rgb(204, 51, 255)
   // 75% value: 1000, rgb(255, 0, 102)
   // high value: 1800, mLightBrown = rgb(235, 129, 27)
 
+  //var c0 = [35,  55,    59];
+  //var c1 = [85,  73.5,  51];
+  //var c2 = [135, 92,    43];
+  //var c3 = [185, 110.5, 35];
+  //var c4 = [235, 129,   27];
   var c0 = [35,  55,    59];
   var c1 = [85,  73.5,  51];
   var c2 = [135, 92,    43];
@@ -46,53 +51,54 @@ function alt2color(alt) {
     b = c4[2];
   }
 
-  return "#" + r.toString(16) + g.toString(16) + b.toString(16);
+  //return "#" + r.toString(16) + g.toString(16) + b.toString(16);
+  return "rgba(" + r.toString() + "," + g.toString() + "," + b.toString() + "," + alpha.toString();
 };
 
 
-
-function plotData2Chart(csvstring, chart) {
-
-  var record_num = 3;  // or however many elements there are in each row
-  var allTextLines = csvstring.split(/\r\n|\n/);
-
-  var series = [];
-
-  for (i = 0; i < allTextLines.length; i++) {
-    tokens = allTextLines[i].split(",");
-    series.push({
-      x: parseFloat(tokens[1]),
-      y: parseFloat(tokens[0]),
-      color: tokens[2]
-    });
-  }
-
-  chart.series[0].setData(series);
+function count2size(count) {
+  return 1.0 + Math.sqrt(count)/10.0;
 };
 
 
-$(function () { 
+function runOnDataLoaded(filename, callback) {
+  $.ajax({
+    type: "GET",
+    url: $("#baseurl").html() + "/data/" + filename,
+    dataType: "text",
+    success: callback
+  });
+}
 
-  $('#container').highcharts({
+
+function setupChart(container, titletext) {
+
+  container.highcharts({
     chart: {
       type: 'scatter',
-      animation: true
+      animation: false
     },
     credits: {
       enabled: false
     },
     title: {
-      text: 'OpenStreetMap in 1,000 Points'
+      text: titletext
     },
     xAxis: {
       title: {
         text: 'longitude'
-      }
+      },
+      min: -190,
+      max: 190,
+      tickInterval: 50
     },
     yAxis: {
       title: {
         text: 'latitude'
-      }
+      },
+      min: -100,
+      max: 100,
+      tickInterval: 25
     },
     tooltip: {
       animation: true,
@@ -104,7 +110,7 @@ $(function () {
     plotOptions: {
       scatter: {
         marker: {
-          radius: 1
+          radius: 1.5
         },
         turboThreshold: 1000000
       }
@@ -115,13 +121,53 @@ $(function () {
     }]
   });
 
-  var chart = $('#intro_chart').highcharts();
+  return container.highcharts();
+};
 
-  $.ajax({
-    type: "GET",
-    url: "data/open_subs_1000_pre.csv",
-    dataType: "text",
-    success: function(data) {plotData2Chart(data, chart);}
-  });
-});
+
+function csv2series(csvstring, alpha = 1.0) {
+  var record_num = 3;  // or however many elements there are in each row
+  var allTextLines = csvstring.split(/\r\n|\n/);
+
+  var series = [];
+
+  for (i = 0; i < allTextLines.length; i++) {
+    tokens = allTextLines[i].split(",");
+    series.push({
+      x: parseFloat(tokens[1]),
+      y: parseFloat(tokens[0]),
+      color: alt2color(parseFloat(tokens[2]), alpha)
+    });
+  }
+
+  return series;
+}
+
+
+function csv2richSeries(csvstring, alpha = 0.6) {
+  var record_num = 3;  // or however many elements there are in each row
+  var allTextLines = csvstring.split(/\r\n|\n/);
+
+  var series = [];
+
+  for (i = 0; i < allTextLines.length; i++) {
+    tokens = allTextLines[i].split(",");
+    series.push({
+      x: parseFloat(tokens[1]),
+      y: parseFloat(tokens[0]),
+      color: alt2color(parseFloat(tokens[2]), alpha),
+      marker: {
+        radius: count2size(parseFloat(tokens[3]))
+      }
+    });
+  }
+
+  return series;
+}
+
+
+function plotSeriesOnChart(series, chart) {
+  chart.series[0].setData(series);
+};
+
 
