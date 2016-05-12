@@ -53,12 +53,18 @@ function alt2color(alt, alpha = 0.6) {
 
   //return "#" + r.toString(16) + g.toString(16) + b.toString(16);
   return "rgba(" + r.toString() + "," + g.toString() + "," + b.toString() + "," + alpha.toString();
-};
+}
 
 
 function count2size(count) {
   return 1.0 + Math.sqrt(count)/10.0;
-};
+}
+
+
+function address2Country(address) {
+  adr_tokens = address.replace(/"/g, '').split(',');
+  return adr_tokens[adr_tokens.length-1].replace(/ /g, '');
+}
 
 
 function runOnDataLoaded(filename, callback) {
@@ -87,18 +93,12 @@ function setupChart(container, titletext) {
     xAxis: {
       title: {
         text: 'longitude'
-      },
-      min: -190,
-      max: 190,
-      tickInterval: 50
+      }
     },
     yAxis: {
       title: {
         text: 'latitude'
-      },
-      min: -100,
-      max: 100,
-      tickInterval: 25
+      }
     },
     tooltip: {
       animation: true,
@@ -126,17 +126,20 @@ function setupChart(container, titletext) {
 
 
 function csv2series(csvstring, alpha = 1.0) {
-  var record_num = 3;  // or however many elements there are in each row
-  var allTextLines = csvstring.split(/\r\n|\n/);
+  //var allTextLines = csvstring.split(/\r\n|\n/);
+  var data = Papa.parse(csvstring).data;
 
   var series = [];
 
-  for (i = 0; i < allTextLines.length; i++) {
-    tokens = allTextLines[i].split(",");
+  for (i = 0; i < data.length; i++) {
+    //tokens = allTextLines[i].split(",");
+    //tokens = Papa.parse(allTextLines[i]).data[0];
+    if (data[i].length != 5) continue;
+
     series.push({
-      x: parseFloat(tokens[1]),
-      y: parseFloat(tokens[0]),
-      color: alt2color(parseFloat(tokens[2]), alpha)
+      x: parseFloat(data[i][1]),
+      y: parseFloat(data[i][0]),
+      color: alt2color(parseFloat(data[i][2]), alpha)
     });
   }
 
@@ -145,20 +148,24 @@ function csv2series(csvstring, alpha = 1.0) {
 
 
 function csv2richSeries(csvstring, alpha = 0.6) {
-  var record_num = 3;  // or however many elements there are in each row
-  var allTextLines = csvstring.split(/\r\n|\n/);
+  //var allTextLines = csvstring.split(/\r\n|\n/);
+  var data = Papa.parse(csvstring).data;
 
   var series = [];
 
-  for (i = 0; i < allTextLines.length; i++) {
-    tokens = allTextLines[i].split(",");
+  for (i = 0; i < data.length; i++) {
+    //tokens = allTextLines[i].split(",");
+    //tokens = Papa.parse(allTextLines[i]);
+    if (data[i].length != 5) continue;
+
     series.push({
-      x: parseFloat(tokens[1]),
-      y: parseFloat(tokens[0]),
-      color: alt2color(parseFloat(tokens[2]), alpha),
+      x: parseFloat(data[i][1]),
+      y: parseFloat(data[i][0]),
+      color: alt2color(parseFloat(data[i][2]), alpha),
       marker: {
-        radius: count2size(parseFloat(tokens[3]))
-      }
+        radius: count2size(parseFloat(data[i][3]))
+      },
+      country: address2Country(data[i][4])
     });
   }
 

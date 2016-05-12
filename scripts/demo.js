@@ -23,7 +23,7 @@ $(function () {
     drawChart();
   });
 
-  selectDatasetButton($($(".dataset-select[dataset='open_vas_density_1000.csv']")[0]));
+  selectDatasetButton($($(".dataset-select[dataset='open_vas_density_geo_1000.csv']")[0]));
   drawChart();
 
 });
