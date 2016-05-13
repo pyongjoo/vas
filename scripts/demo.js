@@ -54,20 +54,19 @@ function resetTextareas() {
   resetMapTextarea();
 }
 
-function drawChart() {
-
+function drawNewChart() {
   var filterFunction = new Function("point", $("#filter-body").val());
   var mapFunction = new Function("point", $("#map-body").val());
   var title = 'Reduced OpenStreetMap';
 
   generateRichPlotlyChart('demo_chart', data_filename, title, filterFunction, mapFunction);
+};
 
-  //runOnDataLoaded(data_filename,
-  //    function(csvstring) {
-  //      plotSeriesOnChart(
-  //          csv2richSeries(csvstring).filter(filterFunction).map(mapFunction),
-  //          chart);
-  //    });
+function updateChart() {
+  var filterFunction = new Function("point", $("#filter-body").val());
+  var mapFunction = new Function("point", $("#map-body").val());
+
+  updatePlotlyChart('demo_chart', data_filename, filterFunction, mapFunction);
 };
 
 function selectDatasetButton(buttonObject) {
@@ -84,7 +83,7 @@ $(function () {
   });
 
   $("#demo-chart-update-btn").click( function(event) {
-    drawChart();
+    updateChart();
   });
 
   // Hook example events.
@@ -96,7 +95,7 @@ $(function () {
 
   selectDatasetButton($($(".dataset-select[dataset='open_vas_density_geo_1000.csv']")[0]));
   resetTextareas();
-  drawChart();
+  drawNewChart();
 });
 
 

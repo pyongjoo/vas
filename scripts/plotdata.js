@@ -207,7 +207,8 @@ function csv2series(csvstring, alpha=0.6) {
       z: parseFloat(data[i][2]),
       density: parseFloat(data[i][3]),
       country: address2Country(data[i][4]),
-      color: alt2color(data[i][2], alpha)
+      color: alt2color(data[i][2], alpha),
+      size: count2size(parseFloat(data[i][3]))
     });
   }
 
@@ -273,7 +274,7 @@ function csv2plotlyRichTrace(csvstring, filter_func, map_func) {
     trace.y.push(series[i].y);
     trace.text.push("Country: " + series[i].country + "; Density: " + series[i].density);
     trace.marker.color.push(series[i].color);
-    trace.marker.size.push(count2size(series[i].density));
+    trace.marker.size.push(series[i].size);
   }
 
   return trace;
@@ -296,6 +297,21 @@ function generateRichPlotlyChart(div, data_source, title, filter_func, map_func)
 
     var t0 = performance.now();
     Plotly.newPlot(div, data, plotlyLayout(title), plotlyOption);
+    var t1 = performance.now();
+
+    var elapsed = Math.round((t1-t0)/10.0)/100.0;
+    $("#viz-time").html(elapsed.toString());
+  });
+}
+
+
+function updatePlotlyChart(div, data_source, filter_func, map_func) {
+  runOnDataLoaded(data_source, function(csvstring) {
+    var data = [csv2plotlyRichTrace(csvstring, filter_func, map_func)];
+    document.getElementById(div).data = data;
+
+    var t0 = performance.now();
+    Plotly.redraw(div);
     var t1 = performance.now();
 
     var elapsed = Math.round((t1-t0)/10.0)/100.0;
