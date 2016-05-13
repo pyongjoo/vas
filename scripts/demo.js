@@ -14,12 +14,12 @@ var mapExampleArr = [
   "return point;",
   "return point;",
   "return point;",
-  "point.color = colorPicker[point.country.hashCode()%colorPicker.length];\
-   point.marker.radius = point.marker.radius/2.0; return point;",
+  "point.color = colorPicker[mod(point.country.hashCode(),colorPicker.length)]; return point;",
 ];
 
-var colorPicker = ["#83AA30","#1499D3","#4D6684","#3D3D3D","#E74700","#F17D80","#737495","#68A8AD","#C4D4AF","#6C8672",
-    "#B0A472","#F5DF65","#2B9464","#59C8DF","#59C8DF","#753A48","#954F47","#C05949","#9AADBD","#9AADBD"
+var colorPicker = [
+  "#83AA30","#1499D3","#4D6684","#3D3D3D","#E74700","#F17D80","#737495","#68A8AD","#C4D4AF","#6C8672",
+  "#B0A472","#F5DF65","#2B9464","#59C8DF","#59C8DF","#753A48","#954F47","#C05949","#9AADBD"
 ];
 
 String.prototype.hashCode = function() {
@@ -58,13 +58,16 @@ function drawChart() {
 
   var filterFunction = new Function("point", $("#filter-body").val());
   var mapFunction = new Function("point", $("#map-body").val());
+  var title = 'Reduced OpenStreetMap';
 
-  runOnDataLoaded(data_filename,
-      function(csvstring) {
-        plotSeriesOnChart(
-            csv2richSeries(csvstring).filter(filterFunction).map(mapFunction),
-            chart);
-      });
+  generateRichPlotlyChart('demo_chart', data_filename, title, filterFunction, mapFunction);
+
+  //runOnDataLoaded(data_filename,
+  //    function(csvstring) {
+  //      plotSeriesOnChart(
+  //          csv2richSeries(csvstring).filter(filterFunction).map(mapFunction),
+  //          chart);
+  //    });
 };
 
 function selectDatasetButton(buttonObject) {
@@ -73,7 +76,7 @@ function selectDatasetButton(buttonObject) {
 }
 
 $(function () { 
-  chart = setupChart($('#demo_chart'), 'Reduced OpenStreetMap');
+  //chart = setupChart($('#demo_chart'), 'Reduced OpenStreetMap');
 
   // Update dataset drop down menu
   $(".dataset-select").click( function(event) {

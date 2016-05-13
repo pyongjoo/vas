@@ -53,12 +53,12 @@ function alt2color(alt, alpha = 0.6) {
   }
 
   //return "#" + r.toString(16) + g.toString(16) + b.toString(16);
-  return "rgba(" + r.toString() + "," + g.toString() + "," + b.toString() + "," + alpha.toString();
+  return "rgba(" + r.toString() + "," + g.toString() + "," + b.toString() + "," + alpha.toString() + ")";
 }
 
 
 function count2size(count) {
-  return 1.0 + Math.sqrt(count)/10.0;
+  return (1.0 + Math.sqrt(count)/10.0)*2;
 }
 
 
@@ -142,10 +142,58 @@ function setupChart(container, titletext) {
 };
 
 
-function csv2series(csvstring, alpha = 1.0) {
-  //var allTextLines = csvstring.split(/\r\n|\n/);
-  var data = Papa.parse(csvstring).data;
+//function csv2series(csvstring, alpha = 1.0) {
+//  //var allTextLines = csvstring.split(/\r\n|\n/);
+//  var data = Papa.parse(csvstring).data;
+//
+//  var series = [];
+//
+//  for (i = 0; i < data.length; i++) {
+//    //tokens = allTextLines[i].split(",");
+//    //tokens = Papa.parse(allTextLines[i]).data[0];
+//    if (data[i].length != 5) continue;
+//
+//    series.push({
+//      x: parseFloat(data[i][1]),
+//      y: parseFloat(data[i][0]),
+//      color: alt2color(parseFloat(data[i][2]), alpha),
+//      count: data[i][3],
+//      country: address2Country(data[i][4])
+//    });
+//  }
+//
+//  return series;
+//}
 
+
+function plotlyLayout(title) {
+  var layout = {
+    title: title,
+    xaxis: {
+      range: [-190, 190],
+      zeroline: false
+    },
+    yaxis: {
+      range: [-100,100],
+      zeroline: false,
+      showline: false
+    },
+    margin: {
+      b: 50,
+      l: 20,
+      r: 20,
+      t: 120
+    },
+    dragmode: 'pan',
+    hovermode: 'closest'
+  };
+
+  return layout;
+}
+
+
+function csv2series(csvstring, alpha=0.6) {
+  var data = Papa.parse(csvstring).data;
   var series = [];
 
   for (i = 0; i < data.length; i++) {
@@ -156,9 +204,10 @@ function csv2series(csvstring, alpha = 1.0) {
     series.push({
       x: parseFloat(data[i][1]),
       y: parseFloat(data[i][0]),
-      color: alt2color(parseFloat(data[i][2]), alpha),
-      count: data[i][3],
-      country: address2Country(data[i][4])
+      z: parseFloat(data[i][2]),
+      density: parseFloat(data[i][3]),
+      country: address2Country(data[i][4]),
+      color: alt2color(data[i][2], alpha)
     });
   }
 
@@ -166,43 +215,132 @@ function csv2series(csvstring, alpha = 1.0) {
 }
 
 
-function csv2richSeries(csvstring, alpha = 0.6) {
+function csv2plotlyTrace(csvstring) {
   //var allTextLines = csvstring.split(/\r\n|\n/);
-  var data = Papa.parse(csvstring).data;
+  var series = csv2series(csvstring);
 
-  var series = [];
+  var trace = {
+    x: [],
+    y: [],
+    text: [],
+    mode: 'markers',
+    type: 'scatter',
+    hoverinfo: "x+y+text",
+    marker: {
+      size: 4,
+      color: []
+    }
+  };
 
-  for (i = 0; i < data.length; i++) {
-    //tokens = allTextLines[i].split(",");
-    //tokens = Papa.parse(allTextLines[i]);
-    if (data[i].length != 5) continue;
-
-    series.push({
-      x: parseFloat(data[i][1]),
-      y: parseFloat(data[i][0]),
-      color: alt2color(parseFloat(data[i][2]), alpha),
-      marker: {
-        radius: count2size(parseFloat(data[i][3]))
-      },
-      count: data[i][3],
-      country: address2Country(data[i][4])
-    });
+  for (i = 0; i < series.length; i++) {
+    trace.x.push(series[i].x);
+    trace.y.push(series[i].y);
+    trace.text.push(series[i].country);
+    trace.marker.color.push(series[i].color);
   }
 
-  return series;
+  return trace;
 }
 
 
-function plotSeriesOnChart(series, chart) {
+function mod(n, m) {
+  return ((n % m) + m) % m;
+}
 
-  chart.series[0].setData([]);    // clean first
 
-  var t0 = performance.now();
-  chart.series[0].setData(series);
-  var t1 = performance.now();
-  var elapsed = Math.round((t1-t0)/10.0)/100.0;
+function csv2plotlyRichTrace(csvstring, filter_func, map_func) {
+  //var allTextLines = csvstring.split(/\r\n|\n/);
+  var series = csv2series(csvstring).filter(filter_func).map(map_func);
 
-  $("#viz-time").html(elapsed.toString());
-};
+  var trace = {
+    x: [],
+    y: [],
+    text: [],
+    mode: 'markers',
+    type: 'scatter',
+    hoverinfo: "x+y+text",
+    marker: {
+      size: [],
+      color: [],
+      line: {
+        width: 0
+      }
+    }
+  };
+
+  for (i = 0; i < series.length; i++) {
+    trace.x.push(series[i].x);
+    trace.y.push(series[i].y);
+    trace.text.push("Country: " + series[i].country + "; Density: " + series[i].density);
+    trace.marker.color.push(series[i].color);
+    trace.marker.size.push(count2size(series[i].density));
+  }
+
+  return trace;
+}
+
+var plotlyOption = {displayModeBar: true, displaylogo: false, showLink: false};
+
+
+function generatePlotlyChart(div, data_source, title) {
+  runOnDataLoaded(data_source, function(csvstring) {
+    var data = [csv2plotlyTrace(csvstring)];
+    Plotly.newPlot(div, data, plotlyLayout(title), plotlyOption);
+  });
+}
+
+
+function generateRichPlotlyChart(div, data_source, title, filter_func, map_func) {
+  runOnDataLoaded(data_source, function(csvstring) {
+    var data = [csv2plotlyRichTrace(csvstring, filter_func, map_func)];
+
+    var t0 = performance.now();
+    Plotly.newPlot(div, data, plotlyLayout(title), plotlyOption);
+    var t1 = performance.now();
+
+    var elapsed = Math.round((t1-t0)/10.0)/100.0;
+    $("#viz-time").html(elapsed.toString());
+  });
+}
+
+
+//function csv2richSeries(csvstring, alpha = 0.6) {
+//  //var allTextLines = csvstring.split(/\r\n|\n/);
+//  var data = Papa.parse(csvstring).data;
+//
+//  var series = [];
+//
+//  for (i = 0; i < data.length; i++) {
+//    //tokens = allTextLines[i].split(",");
+//    //tokens = Papa.parse(allTextLines[i]);
+//    if (data[i].length != 5) continue;
+//
+//    series.push({
+//      x: parseFloat(data[i][1]),
+//      y: parseFloat(data[i][0]),
+//      color: alt2color(parseFloat(data[i][2]), alpha),
+//      marker: {
+//        radius: count2size(parseFloat(data[i][3]))
+//      },
+//      count: data[i][3],
+//      country: address2Country(data[i][4])
+//    });
+//  }
+//
+//  return series;
+//}
+//
+//
+//function plotSeriesOnChart(series, chart) {
+//
+//  chart.series[0].setData([]);    // clean first
+//
+//  var t0 = performance.now();
+//  chart.series[0].setData(series);
+//  var t1 = performance.now();
+//  var elapsed = Math.round((t1-t0)/10.0)/100.0;
+//
+//  $("#viz-time").html(elapsed.toString());
+//};
 
 

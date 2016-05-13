@@ -1,14 +1,9 @@
 $(function () { 
-  var chart = setupChart($('#intro_chart'), 'OpenStreetMap in 1000 Points (VAS)');
+  //var chart = setupChart($('#intro_chart'), 'OpenStreetMap in 1000 Points (VAS)');
 
-  runOnDataLoaded("open_vas_density_geo_1000.csv",
-    function(csvstring) {plotSeriesOnChart(csv2series(csvstring, 0.4), chart);});
+  generatePlotlyChart('intro_chart', 'open_vas_density_geo_1000.csv', 'OpenStreeMap in 1,000 points (VAS)');
 
-
-  var chart2 = setupChart($('#intro_chart2'), 'OpenStreetMap in 1000 Points (uniform random sampling)');
-
-  runOnDataLoaded("open_rs_density_geo_1000.csv",
-    function(csvstring) {plotSeriesOnChart(csv2series(csvstring, 0.4), chart2);});
+  generatePlotlyChart('intro_chart2', 'open_rs_density_geo_1000.csv', 'OpenStreeMap in 1,000 points (VAS)');
 
 });
 
