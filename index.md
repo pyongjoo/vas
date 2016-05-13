@@ -2,11 +2,11 @@
 layout: default
 ---
 
-## A data reduction technique for fast visualization of big data
+## A data reduction technique <br/> for fast visualization of big data
 
-{% for post in site.posts %}
+{% for post in site.posts reversed %}
 
-### [{{ post.title }}]({{ post.url | prepend: site.baseurl }})
+### {{ post.title }}
 
 {{ post.content }}
 
